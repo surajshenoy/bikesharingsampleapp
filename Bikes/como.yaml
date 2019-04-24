@@ -1,0 +1,6 @@
+dependencies:
+  data:
+    type: mongo
+    name: bikes-data
+environment:
+  MONGO_CONNECTION_STRING: $(data.connectionString)

@@ -2,6 +2,12 @@
   "name": "contoso.bikerental.bikes",
   "version": "0.1.0",
   "description": "Microservice for managing bikes",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "debug": "nodemon --inspect=0.0.0.0:9229 server.js",
+    "dev": "como run --restore nodemon server.js"
+  },
   "dependencies": {
     "express": "^4.13.4",
     "morgan": "^1.7.0",

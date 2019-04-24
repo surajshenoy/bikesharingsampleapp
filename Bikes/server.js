@@ -9,8 +9,9 @@ var ObjectId = require('mongodb').ObjectID;
 var express = require('express');
 var async = require('async');
 
-var mongoDBCollection = process.env.mongo_collection;
-var mongoDBConnStr = process.env.mongo_connectionstring;
+// var mongoDBCollection = process.env.mongo_collection;
+var mongoDBCollection = "bikes";
+var mongoDBConnStr = process.env.MONGO_CONNECTION_STRING;
 console.log("Collection: " + mongoDBCollection);
 console.log("MongoDB connection string: " + mongoDBConnStr);
 
@@ -65,7 +66,7 @@ var incomingBikeSchema = {
 };
 
 var app = express();
-app.use(requestIDParser);
+// app.use(requestIDParser);
 app.use(morgan("dev"));
 app.use(bodyParser.json());
 
@@ -350,7 +351,7 @@ app.get('/hello', function(req, res) {
 });
 
 // start server ------------------------------------------------------------
-var port = 80;
+var port = process.env.PORT || 3000;
 var server = null;
 
 process.on("SIGINT", () => {
