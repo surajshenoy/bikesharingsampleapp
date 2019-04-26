@@ -15,10 +15,11 @@ app.prepare()
         const server = express()
 
         server.get('/api/host', (req, res) => {
-            var apiHost = url.format({
-                protocol: req.protocol,
-                hostname: getApiUrl(req.get('host'))
-            });
+            // var apiHost = url.format({
+            //     protocol: req.protocol,
+            //     hostname: getApiUrl(req.get('host'))
+            // });
+            var apiHost = "http://" + process.env.API_NAME;
 
             console.log("API_HOST = " + apiHost);
 

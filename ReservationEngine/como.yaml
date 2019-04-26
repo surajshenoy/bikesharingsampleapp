@@ -1,0 +1,15 @@
+name: reservationengine
+dependencies:
+  data:
+    type: mongo
+    name: reservation-data
+  bikes:
+    ref: comosamples/bikesharing-bikes
+  billing:
+    ref: comosamples/bikesharing-billing
+environment:
+  bikes_dnsname: $(bikes.host)
+  billing_dnsname: $(billing.host)
+  mongo_connectionstring: $(data.connectionString)
+  mongo_dbname: "resdb"
+  mongo_collection: "reservation"

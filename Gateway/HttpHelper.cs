@@ -18,6 +18,7 @@ namespace app
 
         public static Task<HttpResponseMessage> GetAsync(string url, HttpRequest originRequest)
         {
+            Console.WriteLine("**************************************************\nURL = " + url);
             return doHttpAndLog(new HttpRequestMessage(HttpMethod.Get, url).AddOutboundHeaders(originRequest));
         }
 

@@ -1,0 +1,9 @@
+name: reservation
+dependencies:
+  data:
+    type: mongo
+    name: reservation-data
+environment:
+  mongo_connectionstring: $(data.connectionString)
+  mongo_dbname: "resdb"
+  mongo_collection: "reservation"

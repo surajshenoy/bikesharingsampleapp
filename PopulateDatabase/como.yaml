@@ -1,5 +1,14 @@
+name: populatedatabase
 dependencies:
   gateway:
-    ref: comosamples/gateway
+    ref: comosamples/bikesharing-gateway
+  users:
+    ref: comosamples/bikesharing-users
+  bikes:
+    ref: comosamples/bikesharing-bikes
 environment:
-  gateway_dnsname: "gateway"
+  gateway_dnsname: $(gateway.host)
+  users_dnsname: $(users.host)
+  bikes_dnsname: $(bikes.host)
+
+

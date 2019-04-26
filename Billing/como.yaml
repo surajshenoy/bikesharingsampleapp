@@ -1,0 +1,8 @@
+name: billing
+dependencies:
+  data:
+    type: mongo
+environment:
+  mongo_connectionstring: $(data.connectionString)
+  mongo_dbname: "billing"
+

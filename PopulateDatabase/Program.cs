@@ -14,8 +14,8 @@ namespace app
     {
         private static readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
         private static readonly string _gatewayUrl = $"http://{Environment.GetEnvironmentVariable("gateway_dnsname")}";
-        // private static readonly string _bikesUrl = $"http://{Environment.GetEnvironmentVariable("bikes_dnsname")}";
-        // private static readonly string _usersUrl = $"http://{Environment.GetEnvironmentVariable("users_dnsname")}";
+        private static readonly string _bikesUrl = $"http://{Environment.GetEnvironmentVariable("bikes_dnsname")}";
+        private static readonly string _usersUrl = $"http://{Environment.GetEnvironmentVariable("users_dnsname")}";
 
         public static void Main(string[] args)
         {
@@ -38,22 +38,22 @@ namespace app
                 Console.WriteLine("Checking to see if services are up...");
 
                 // Check bikes
-                // bool bikesReady = false;
-                // try { bikesReady = (await _httpClient.GetAsync($"{_bikesUrl}/hello")).IsSuccessStatusCode; } catch { }
-                // if (!bikesReady)
-                // {
-                //     Console.WriteLine("Bikes not ready :(");
-                //     Console.WriteLine($"{_bikesUrl}/hello");
-                // }
+                bool bikesReady = false;
+                try { bikesReady = (await _httpClient.GetAsync($"{_bikesUrl}/hello")).IsSuccessStatusCode; } catch { }
+                if (!bikesReady)
+                {
+                    Console.WriteLine("Bikes not ready :(");
+                    Console.WriteLine($"{_bikesUrl}/hello");
+                }
 
                 // Check users
-                // bool usersReady = false;
-                // try { usersReady = (await _httpClient.GetAsync($"{_usersUrl}/hello")).IsSuccessStatusCode; } catch { }
-                // if (!usersReady)
-                // {
-                //     Console.WriteLine("Users not ready :(");
-                //     Console.WriteLine($"{_usersUrl}/hello");
-                // }
+                bool usersReady = false;
+                try { usersReady = (await _httpClient.GetAsync($"{_usersUrl}/hello")).IsSuccessStatusCode; } catch { }
+                if (!usersReady)
+                {
+                    Console.WriteLine("Users not ready :(");
+                    Console.WriteLine($"{_usersUrl}/hello");
+                }
 
                 // Check gateway
                 bool gatewayReady = false;
@@ -64,8 +64,7 @@ namespace app
                     Console.WriteLine($"{_gatewayUrl}/hello");
                 }
 
-                // if (bikesReady && usersReady && gatewayReady)
-                if (gatewayReady)
+                if (bikesReady && usersReady && gatewayReady)
                 {
                     // Success!
                     Console.WriteLine("Services are up!");

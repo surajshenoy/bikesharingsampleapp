@@ -1,0 +1,6 @@
+name: bikesharingweb
+dependencies:
+  gateway:
+    ref: comosamples/bikesharing-gateway
+environment:
+  API_NAME: $(gateway.host)

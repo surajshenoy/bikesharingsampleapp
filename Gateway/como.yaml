@@ -1,14 +1,18 @@
+name: gateway
 dependencies:
   users:
-    ref: comosamples/users
+    ref: comosamples/bikesharing-users
   bikes:
-    ref: comosamples/bikes
-  # reservation:
-  #   ref: comosamples/reservation
-  # reservationengine:
-  #   ref: comosamples/reservationsengine
+    ref: comosamples/bikesharing-bikes
+  reservation:
+    ref: comosamples/bikesharing-reservation
+  reservationengine:
+    ref: comosamples/bikesharing-reservationengine
+  billing:
+    ref: comosamples/bikesharing-billing
 environment:
-  users_dnsname: "users"
-  bikes_dnsname: "bikes"
-  reservation_dnsname: "reservation"
-  reservationengine_dnsname: "reservationengine"
+  bikes_dnsname: $(bikes.host)
+  users_dnsname: $(users.host)
+  reservation_dnsname: $(reservation.host)
+  reservationengine_dnsname: $(reservationengine.host)
+  billing_dnsname: $(billing.host)
