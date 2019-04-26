@@ -1,0 +1,13 @@
+variables:
+  AZURE_KEYVAULT_NAME: johnsta-contosovault
+mappings:
+- module: github.com/Microsoft/como/modules/local/container
+  type: container
+- module: github.com/Microsoft/como/modules/local/mongo/container
+  type: mongo
+- module: github.com/Microsoft/como/modules/local/rabbitmq/container
+  type: rabbitmq
+- module: github.com/Microsoft/como/modules/local/redis/container
+  type: redis
+- module: ../modules/sql
+  type: sql

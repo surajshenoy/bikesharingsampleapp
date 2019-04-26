@@ -1,0 +1,13 @@
+dependencies:
+  data:
+    type: sql
+    name: user-data
+    binding:
+      readwrite: true
+environment:
+  DATABASE_CONNECTION_STRING: $(data.connectionString)
+  sql_username: $(data.username)
+  sql_password: $(data.password)
+  sql_server: $(data.server)
+  sql_database: $(data.database)
+

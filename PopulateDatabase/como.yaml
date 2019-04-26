@@ -1,0 +1,5 @@
+dependencies:
+  gateway:
+    ref: comosamples/gateway
+environment:
+  gateway_dnsname: "gateway"

@@ -1,0 +1,14 @@
+dependencies:
+  users:
+    ref: comosamples/users
+  bikes:
+    ref: comosamples/bikes
+  # reservation:
+  #   ref: comosamples/reservation
+  # reservationengine:
+  #   ref: comosamples/reservationsengine
+environment:
+  users_dnsname: "users"
+  bikes_dnsname: "bikes"
+  reservation_dnsname: "reservation"
+  reservationengine_dnsname: "reservationengine"
