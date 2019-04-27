@@ -1,4 +1,6 @@
 variables:
+  AZURE_RESOURCE_GROUP: bikesharingapp
+  AZURE_LOCATION: westus2
   AZURE_KEYVAULT_NAME: johnsta-contosovault
 mappings:
 - module: github.com/Microsoft/como/modules/local/container
@@ -9,5 +11,5 @@ mappings:
   type: rabbitmq
 - module: github.com/Microsoft/como/modules/local/redis/container
   type: redis
-- module: ../modules/sql
+- module: ../../modules/sql
   type: sql
