@@ -78,10 +78,10 @@ function requestIDParser(req, res, next) {
     if (reqID) {
         test = requestIDRegex.test(reqID);
     }
-    if (!test && req.path != "/hello") {
-        res.status(400).send("Couldn't parse request id guid");
-        return;
-    }
+    // if (!test && req.path != "/hello") {
+    //     res.status(400).send("Couldn't parse request id guid");
+    //     return;
+    // }
 
     console.log("RequestID start: " + reqID);
     next();
@@ -96,7 +96,7 @@ app.get('/api/availableBikes', function (req, res) {
     
     var query = {};
     // BUG! Uncomment code to fix :)
-    // query = { available: true };
+    query = { available: true };
 
     // Add user filter conditions
     for (var queryParam in req.query) {
