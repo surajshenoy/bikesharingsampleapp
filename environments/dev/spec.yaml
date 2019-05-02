@@ -1,5 +1,5 @@
 variables:
-  AZURE_RESOURCE_GROUP: bikesharingapp
+  AZURE_RESOURCE_GROUP: bike-sharing-sample
   AZURE_LOCATION: westus2
   AZURE_KEYVAULT_NAME: johnsta-contosovault
 mappings:
