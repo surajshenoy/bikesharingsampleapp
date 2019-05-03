@@ -97,6 +97,7 @@ stages:
               helmChart: '$(System.ArtifactsDirectory)/charts'
               overrides: |
                 image.tag:$(Build.BuildId)
+                buildID:$(Build.BuildId)
                
           - task: KubernetesManifest@1
             displayName: deploy
@@ -170,6 +171,7 @@ stages:
               helmChart: '$(System.ArtifactsDirectory)/charts'
               overrides: |
                 image.tag:$(Build.BuildId)
+                buildID:$(Build.BuildId)
 
           - task: KubernetesManifest@1
             displayName: deploy
