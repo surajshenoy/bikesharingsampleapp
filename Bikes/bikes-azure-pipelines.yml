@@ -37,8 +37,8 @@ stages:
   - job: Build
     displayName: Build job
     pool:
-      # name: work-machine
-      vmImage: $(vmImageName)
+      name: work-machine
+      # vmImage: $(vmImageName)
     steps:
 
     - task: Docker@2
