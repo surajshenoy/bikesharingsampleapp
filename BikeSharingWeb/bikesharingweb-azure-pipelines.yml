@@ -97,7 +97,7 @@ stages:
               helmChart: '$(System.ArtifactsDirectory)/charts'
               overrides: |
                 image.tag:$(Build.BuildId)
-                # ReleaseName:$(Build.BuildId)
+                ingress.hosts:atul.dev.bikesharingweb.czl7nfjqqx.wus2.azds.io
                 # ReleaseService:$(Build.BuildId)
 
           - task: KubernetesManifest@1
