@@ -4,7 +4,7 @@
 fullnameOverride: bikes
 replicaCount: 1
 image:
-  repository: azdspublic/bikesharing-bikes
+  repository: builddemo.azurecr.io/bikes
   tag: build.20190418.1
   pullPolicy: IfNotPresent
 imagePullSecrets: []
