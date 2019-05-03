@@ -125,13 +125,6 @@ stages:
               artifactName: 'charts'
               downloadPath: '$(System.ArtifactsDirectory)/charts'
 
-          - task: KubernetesManifest@0
-            displayName: 'Create PR namespace'
-            inputs:
-              kubernetesServiceConnection: 'BikeSharingSampleApp'
-              action: deploy
-              manifests: '$(System.ArtifactsDirectory)/manifests/pr-namespace.yml'
-          
           - bash: |
               Kubectl create ns $(system.pullRequest.sourceBranch)
               kubectl label --overwrite ns $(system.pullRequest.sourceBranch) azds.io/space=true
