@@ -125,11 +125,35 @@ stages:
               artifactName: 'charts'
               downloadPath: '$(System.ArtifactsDirectory)/charts'
 
-          - bash: |
-              Kubectl create ns $(system.pullRequest.sourceBranch)
-              kubectl label --overwrite ns $(system.pullRequest.sourceBranch) azds.io/space=true
-              kubectl label --overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=master
-            displayName: 'Create PR space'
+          # - bash: |
+          #     Kubectl create ns $(system.pullRequest.sourceBranch)
+          #     kubectl label --overwrite ns $(system.pullRequest.sourceBranch) azds.io/space=true
+          #     kubectl label --overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=master
+          #   displayName: 'Create PR space'
+
+          - task: Kubernetes@1
+            displayName: 'Create NS'
+            inputs:
+              kubernetesServiceEndpoint: BikeSharingSampleApp
+              command: create
+              arguments: 'ns $(system.pullRequest.sourceBranch)'
+              checkLatest: true
+
+          - task: Kubernetes@1
+            displayName: 'Add label'
+            inputs:
+              kubernetesServiceEndpoint: BikeSharingSampleApp
+              command: label
+              arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/space=true'
+              checkLatest: true
+
+          - task: Kubernetes@1
+            displayName: 'Add label root'
+            inputs:
+              kubernetesServiceEndpoint: BikeSharingSampleApp
+              command: label
+              arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=master'
+              checkLatest: true
 
           - task: KubernetesManifest@0
             displayName: Create imagePullSecret
