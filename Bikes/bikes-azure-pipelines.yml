@@ -183,3 +183,31 @@ stages:
               namespace: $(k8sNamespaceforpr)
               manifests: $(bake.manifestsBundle)
               imagePullSecrets: $(imagePullSecret)
+          
+          # - task: AzureCLI@1
+          #   displayName: 'AZDS list uris'
+          #   inputs:
+          #     azureSubscription: 'AzureSub-Toto'
+          #     scriptLocation: inlineScript
+          #     inlineScript: |
+          #       azds list-uris -o json 
+          #       azds list-uris -o json > $(AGENT.TEMPDIRECTORY)/azdsuri.txt
+
+          # - powershell: |
+          #     $uriret = (Get-Content $(AGENT.TEMPDIRECTORY)/azdsuri.txt | Out-String | ConvertFrom-Json)[0].uri
+          #     Write-Host "##vso[task.setvariable variable=RETURI]$uriret"
+          #     Write-Host "$uriret"
+          #   displayName: 'Saving returned url'
+          
+          # - task: jikuma.devops-github-extension.custom-build-release-task.azuredevopsgithub@0
+          #   displayName: 'Github POST'
+          #   inputs:
+          #     gitHubConnection: 'GitHub'
+          #     body: |
+          #       {
+          #         "state": "success",
+          #         "target_url": "$(RETURI)",
+          #         "description": "available",
+          #         "context": "Dev Spaces review app"
+          #       }
+          #     githubrestapiurl: 'https://api.github.com/repos/$(BUILD.REPOSITORY.ID)/statuses/$(BUILD.SOURCEVERSION)'
