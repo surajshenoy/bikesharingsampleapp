@@ -23,7 +23,7 @@ variables:
   tag: '$(Build.BuildId)'
   
   # Kubernetes Namespace
-  k8sNamespace: 'master'
+  k8sNamespace: 'atul'
   k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
   imagePullSecret: 'builddemodfb0-auth'
 
