@@ -85,7 +85,7 @@ stages:
               namespace: $(k8sNamespace)
               dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
 
-          - task: KubernetesManifest@1
+          - task: KubernetesManifest@0
             displayName: bake
             name: bake
             inputs:
@@ -96,7 +96,7 @@ stages:
                 image.tag:$(Build.BuildId)
                 buildID:"1"
                
-          - task: KubernetesManifest@1
+          - task: KubernetesManifest@0
             displayName: deploy
             name: deploy
             inputs:
@@ -165,7 +165,7 @@ stages:
               namespace: $(k8sNamespaceforpr)
               dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
 
-          - task: KubernetesManifest@1
+          - task: KubernetesManifest@0
             displayName: bake
             name: bake
             inputs:
@@ -176,7 +176,7 @@ stages:
                 image.tag:$(Build.BuildId)
                 buildID:"1"
 
-          - task: KubernetesManifest@1
+          - task: KubernetesManifest@0
             displayName: deploy
             name: deploy
             inputs:
