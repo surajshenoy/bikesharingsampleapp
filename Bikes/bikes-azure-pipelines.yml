@@ -91,7 +91,7 @@ stages:
             inputs:
               action: bake
               helmChart: '$(System.ArtifactsDirectory)/charts'
-              release.Name: 'bikesharing'
+              release.Name: bikesharing
               overrides: |
                 image.tag:$(Build.BuildId)
                 buildID:"1"
@@ -171,7 +171,7 @@ stages:
             inputs:
               action: bake
               helmChart: '$(System.ArtifactsDirectory)/charts'
-              release.Name: 'bikesharing'
+              release.Name: bikesharing
               overrides: |
                 image.tag:$(Build.BuildId)
                 buildID:"1"
