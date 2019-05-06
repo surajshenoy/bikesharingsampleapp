@@ -27,7 +27,7 @@ variables:
   k8sNamespace: 'atul'
   k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
   imagePullSecret: 'builddemodfb0-auth'
-  AZDSDefaultSpaceL: 'master'
+  AZDSDefaultSpace: 'master'
   AZDSControllerName: 'build2019'
   AZDSControllerRG: 'build2019'
 
