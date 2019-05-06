@@ -119,6 +119,22 @@ stages:
       runOnce:
         deploy:
           steps:
+
+        - task: jikuma.devops-github-extension.custom-build-release-task.azuredevopsgithub@0
+          displayName: 'Github POST'
+          name: UpdatePRState
+          inputs:
+            gitHubConnection: 'GitHub'
+            body: |
+              {
+                "state": "pending",
+                "target_url": "$(RETURI)",
+                "description": "creating url for dev space",
+                "context": "Dev Spaces review app"
+              }
+            githubrestapiurl: 'https://api.github.com/repos/$(BUILD.REPOSITORY.ID)/statuses/$(system.pullRequest.sourceCommitId)'
+
+
           - task: DownloadPipelineArtifact@1
             inputs:
               artifactName: 'charts'
