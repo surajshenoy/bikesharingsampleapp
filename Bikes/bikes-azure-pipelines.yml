@@ -27,6 +27,9 @@ variables:
   k8sNamespace: 'atul'
   k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
   imagePullSecret: 'builddemodfb0-auth'
+  AZDSDefaultSpaceL: 'master'
+  AZDSControllerName: 'build2019'
+  AZDSControllerRG: 'build2019'
 
 stages:
 - stage: Build
@@ -185,6 +188,8 @@ stages:
               azureSubscription: 'Azure-Sub-Bike'
               scriptLocation: inlineScript
               inlineScript: |
+                azds controller select -n $(AZDSControllerName) -g $(AZDSControllerRG)
+                azds space select -n $(AZDSDefaultSpace)/$(BUILD.SOURCEBRANCHNAME) -y
                 azds list-uris -o json 
                 azds list-uris -o json > $(AGENT.TEMPDIRECTORY)/azdsuri.txt
 
