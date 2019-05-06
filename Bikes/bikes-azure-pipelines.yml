@@ -195,6 +195,7 @@ stages:
           
           - task: jikuma.devops-github-extension.custom-build-release-task.azuredevopsgithub@0
             displayName: 'Github POST'
+            name: UpdatePR
             inputs:
               gitHubConnection: 'GitHub'
               body: |
