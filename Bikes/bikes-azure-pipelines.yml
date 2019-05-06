@@ -205,4 +205,4 @@ stages:
                   "description": "available",
                   "context": "Dev Spaces review app"
                 }
-              githubrestapiurl: 'https://api.github.com/repos/$(BUILD.REPOSITORY.ID)/statuses/$(BUILD.SOURCEVERSION)'
+              githubrestapiurl: 'https://api.github.com/repos/$(BUILD.REPOSITORY.ID)/statuses/$(system.pullRequest.sourceCommitId)'
