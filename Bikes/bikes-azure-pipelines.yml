@@ -23,12 +23,10 @@ variables:
   tag: '$(Build.BuildId)'
   
   # Kubernetes Namespace
+  # Kubernetes Namespace change to Master for main demo
   k8sNamespace: 'atul'
   k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
   imagePullSecret: 'builddemodfb0-auth'
-
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
 
 stages:
 - stage: Build
@@ -38,7 +36,7 @@ stages:
     displayName: Build job
     pool:
       name: work-machine
-      # vmImage: $(vmImageName)
+
     steps:
 
     - task: Docker@2
@@ -65,8 +63,8 @@ stages:
     displayName: Deploy job
     pool:
       name: work-machine
-      # vmImage: $(vmImageName)
-    environment: 'BikeSharingSampleApp'
+
+    environment: 'BikeSharingSampleApp-Dev'
     strategy:
       runOnce:
         deploy:
@@ -115,7 +113,7 @@ stages:
     displayName: Deploy job
     pool:
       name: work-machine
-      # vmImage: $(vmImageName)
+
     environment: 'BikeSharing-PR'
     strategy:
       runOnce:
@@ -125,12 +123,6 @@ stages:
             inputs:
               artifactName: 'charts'
               downloadPath: '$(System.ArtifactsDirectory)/charts'
-
-          # - bash: |
-          #     Kubectl create ns $(system.pullRequest.sourceBranch)
-          #     kubectl label --overwrite ns $(system.pullRequest.sourceBranch) azds.io/space=true
-          #     kubectl label --overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=master
-          #   displayName: 'Create PR space'
 
           - task: Kubernetes@1
             displayName: 'Create NS'
