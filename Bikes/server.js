@@ -88,7 +88,7 @@ function requestIDParser(req, res, next) {
     console.log("RequestID done: " + reqID);
 }
 
-// api ------------------------------------------------------------
+// api -------------------------------------------------------------
 
 // find bike --------------------------------------------------------------
 app.get('/api/availableBikes', function (req, res) {
