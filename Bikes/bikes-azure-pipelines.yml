@@ -57,8 +57,8 @@ stages:
         artifactName: 'charts'
         targetPath: 'Bikes/charts/bikes'
 
-- stage: DeployToDefault
-  displayName: Deploy to Default
+- stage: DeployToMaster
+  displayName: Deploy to Master
   dependsOn: Build
   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/'))
   jobs:
@@ -107,8 +107,8 @@ stages:
               manifests: $(bake.manifestsBundle)
               imagePullSecrets: $(imagePullSecret)
 
-- stage: DeployForPR
-  displayName: Deploy to review app
+- stage: DeployPR
+  displayName: Deploy PR review app
   dependsOn: Build
   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/pull/'))
   jobs:
@@ -129,7 +129,7 @@ stages:
               downloadPath: '$(System.ArtifactsDirectory)/charts'
 
           - task: Kubernetes@1
-            displayName: 'Create NS'
+            displayName: 'Create namespace'
             inputs:
               kubernetesServiceEndpoint: BikeSharingSampleApp
               command: create
@@ -137,7 +137,7 @@ stages:
               checkLatest: true
 
           - task: Kubernetes@1
-            displayName: 'Add label'
+            displayName: 'Add devspace label'
             inputs:
               kubernetesServiceEndpoint: BikeSharingSampleApp
               command: label
@@ -145,7 +145,7 @@ stages:
               checkLatest: true
 
           - task: Kubernetes@1
-            displayName: 'Add label root'
+            displayName: 'Setup root devspace to master'
             inputs:
               kubernetesServiceEndpoint: BikeSharingSampleApp
               command: label
@@ -183,7 +183,7 @@ stages:
               imagePullSecrets: $(imagePullSecret)
           
           - task: AzureCLI@1
-            displayName: 'AZDS list uris'
+            displayName: 'List all review app URLs'
             inputs:
               azureSubscription: 'Azure-Sub-Bike'
               scriptLocation: inlineScript
@@ -197,10 +197,10 @@ stages:
               $uriret = (Get-Content $(AGENT.TEMPDIRECTORY)/azdsuri.txt | Out-String | ConvertFrom-Json)[0].uri
               Write-Host "##vso[task.setvariable variable=RETURI]$uriret"
               Write-Host "$uriret"
-            displayName: 'Saving returned url'
+            displayName: 'Get PR review app url for the current PR'
           
           - task: jikuma.devops-github-extension.custom-build-release-task.azuredevopsgithub@0
-            displayName: 'Github POST'
+            displayName: 'Write the PR review app details to GitHub'
             name: UpdatePR
             inputs:
               gitHubConnection: 'GitHub'
