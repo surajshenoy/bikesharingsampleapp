@@ -90,7 +90,7 @@ function requestIDParser(req, res, next) {
 
 // api ------------------------------------------------------------
 
-// find bike ------------------------------------------------------------
+// find bike --------------------------------------------------------------
 app.get('/api/availableBikes', function (req, res) {
     var requestID = req.header(requestIDHeaderName);
     
