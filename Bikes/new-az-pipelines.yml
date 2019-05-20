@@ -1,0 +1,214 @@
+# Deploy to Azure Kubernetes Service
+# Build and push image to Azure Container Registry; Deploy to Azure Kubernetes Service
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - Bikes/*
+
+resources:
+- repo: self
+
+variables:
+
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'df9d8a54-286b-47af-8f89-e423226944da'
+  imageRepository: 'bikes'
+  containerRegistry: 'builddemo.azurecr.io'
+  dockerfilePath: 'Bikes/Dockerfile'
+  tag: '$(Build.BuildId)'
+  
+  # Kubernetes Namespace
+  # Kubernetes Namespace change to Master for main demo
+  k8sNamespace: 'atul'
+  k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
+  imagePullSecret: 'builddemodfb0-auth'
+  AZDSDefaultSpace: 'master'
+  AZDSControllerName: 'build2019'
+  AZDSControllerRG: 'build2019'
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:  
+  - job: Build
+    displayName: Build job
+    pool:
+      name: work-machine
+
+    steps:
+
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+        
+    - task: PublishPipelineArtifact@0
+      inputs:
+        artifactName: 'charts'
+        targetPath: 'Bikes/charts/bikes'
+
+- stage: DeployToMaster
+  displayName: Deploy to Master
+  dependsOn: Build
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/'))
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    pool:
+      name: work-machine
+
+    environment: 'BikeSharingSampleApp-Dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@1
+            inputs:
+              artifactName: 'charts'
+              downloadPath: '$(System.ArtifactsDirectory)/charts'
+
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              kubernetesServiceConnection: 'BikeSharingSampleApp'
+              action: createSecret
+              secretName: $(imagePullSecret)
+              namespace: $(k8sNamespace)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+          - task: KubernetesManifest@0
+            displayName: bake
+            name: bake
+            inputs:
+              action: bake
+              helmChart: '$(System.ArtifactsDirectory)/charts'
+              releaseName: bikesharing
+              overrides: |
+                image.tag:$(Build.BuildId)
+                buildID:"1"
+               
+          - task: KubernetesManifest@0
+            displayName: deploy
+            name: deploy
+            inputs:
+              kubernetesServiceConnection: 'BikeSharingSampleApp'
+              action: deploy
+              namespace: $(k8sNamespace)
+              manifests: $(bake.manifestsBundle)
+              imagePullSecrets: $(imagePullSecret)
+
+- stage: DeployPR
+  displayName: Deploy PR review app
+  dependsOn: Build
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/pull/'))
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    pool:
+      name: work-machine
+
+    environment: 'BikeSharing-PR'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          
+          - task: DownloadPipelineArtifact@1
+            inputs:
+              artifactName: 'charts'
+              downloadPath: '$(System.ArtifactsDirectory)/charts'
+
+          - task: Kubernetes@1
+            displayName: 'Create namespace'
+            inputs:
+              kubernetesServiceEndpoint: BikeSharingSampleApp
+              command: create
+              arguments: 'ns $(system.pullRequest.sourceBranch)'
+              checkLatest: true
+
+          - task: Kubernetes@1
+            displayName: 'Add devspace label'
+            inputs:
+              kubernetesServiceEndpoint: BikeSharingSampleApp
+              command: label
+              arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/space=true'
+              checkLatest: true
+
+          - task: Kubernetes@1
+            displayName: 'Setup root devspace to master'
+            inputs:
+              kubernetesServiceEndpoint: BikeSharingSampleApp
+              command: label
+              arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=master'
+              checkLatest: true
+
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              kubernetesServiceConnection: 'BikeSharingSampleApp'
+              action: createSecret
+              secretName: $(imagePullSecret)
+              namespace: $(k8sNamespaceforpr)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+          - task: KubernetesManifest@0
+            displayName: bake
+            name: bake
+            inputs:
+              action: bake
+              helmChart: '$(System.ArtifactsDirectory)/charts'
+              releaseName: bikesharing
+              overrides: |
+                image.tag:$(Build.BuildId)
+                buildID:"1"
+
+          - task: KubernetesManifest@0
+            displayName: deploy
+            name: deploy
+            inputs:
+              kubernetesServiceConnection: 'BikeSharingSampleApp'
+              action: deploy
+              namespace: $(k8sNamespaceforpr)
+              manifests: $(bake.manifestsBundle)
+              imagePullSecrets: $(imagePullSecret)
+          
+          - task: AzureCLI@1
+            displayName: 'List all review app URLs'
+            inputs:
+              azureSubscription: 'Azure-Sub-Bike'
+              scriptLocation: inlineScript
+              inlineScript: |
+                azds controller select -n $(AZDSControllerName) -g $(AZDSControllerRG)
+                azds space select -n $(AZDSDefaultSpace)/$(system.pullRequest.sourceBranch) -y
+                azds list-uris -o json 
+                azds list-uris -o json > $(AGENT.TEMPDIRECTORY)/azdsuri.txt
+
+          - powershell: |
+              $uriret = (Get-Content $(AGENT.TEMPDIRECTORY)/azdsuri.txt | Out-String | ConvertFrom-Json)[0].uri
+              Write-Host "##vso[task.setvariable variable=RETURI]$uriret"
+              Write-Host "$uriret"
+            displayName: 'Get PR review app url for the current PR'
+          
+          - task: jikuma.devops-github-extension.custom-build-release-task.azuredevopsgithub@0
+            displayName: 'Write the PR review app details to GitHub'
+            name: UpdatePR
+            inputs:
+              gitHubConnection: 'GitHub'
+              body: |
+                {
+                  "state": "success",
+                  "target_url": "$(RETURI)",
+                  "description": "available",
+                  "context": "Dev Spaces review app"
+                }
+              githubrestapiurl: 'https://api.github.com/repos/$(BUILD.REPOSITORY.ID)/statuses/$(system.pullRequest.sourceCommitId)'
