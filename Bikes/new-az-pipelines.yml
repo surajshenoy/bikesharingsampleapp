@@ -2,6 +2,7 @@
 # Build and push image to Azure Container Registry; Deploy to Azure Kubernetes Service
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
+# Trigger only for master branch, Bikes folder
 trigger:
   branches:
     include:
@@ -15,22 +16,35 @@ resources:
 
 variables:
 
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: 'df9d8a54-286b-47af-8f89-e423226944da'
+  # Create container registry service connection and provide the connection name or it's GUID here. Learn more https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
+  dockerRegistryServiceConnection: 'CONTAINER-REGISTRY-CONNECTION-NAME'
+  
+  # Provide the container registry url for example builddemo.azurecr.io
+  containerRegistry: 'CONTAINER-REGISTRY-URL'
+  
+  # Create Kubernetes service connection and provide the connection name or it's GUID here. Learn more https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
+  k8sServiceConnection: 'KUBERNETES-CONNECTION-NAME'
+  
+  # Provide the name of Kubernetes cluster
+  AZDSControllerName: 'KUBERNETES-CLUSTER-NAME'
+  
+  # Provide the resource group name of Kubernetes cluster
+  AZDSControllerRG: 'KUBERNETES-CLUSTER-RESOURCE-GROUP'
+  
   imageRepository: 'bikes'
-  containerRegistry: 'builddemo.azurecr.io'
   dockerfilePath: 'Bikes/Dockerfile'
   tag: '$(Build.BuildId)'
   
-  # Kubernetes Namespace
-  # Kubernetes Namespace change to Master for main demo
-  k8sNamespace: 'atul'
+  # Kubernetes Namespace where all changes from master branch are deployed
+  k8sNamespace: 'master'
+  # Dynamically created Kubernetes Namespace where all pull request changes are deployed
   k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
+  
+  # Name of imagepullsecret
   imagePullSecret: 'builddemodfb0-auth'
-  AZDSDefaultSpace: 'master'
-  AZDSControllerName: 'build2019'
-  AZDSControllerRG: 'build2019'
 
+
+# CI stage for build and pushing image to container registry
 stages:
 - stage: Build
   displayName: Build stage
@@ -38,7 +52,7 @@ stages:
   - job: Build
     displayName: Build job
     pool:
-      name: work-machine
+      vmImage: 'ubuntu-latest'
 
     steps:
 
@@ -57,6 +71,7 @@ stages:
         artifactName: 'charts'
         targetPath: 'Bikes/charts/bikes'
 
+# Deploy all changes to master branch 
 - stage: DeployToMaster
   displayName: Deploy to Master
   dependsOn: Build
@@ -65,7 +80,7 @@ stages:
   - deployment: Deploy
     displayName: Deploy job
     pool:
-      name: work-machine
+      vmImage: 'ubuntu-latest'
 
     environment: 'BikeSharingSampleApp-Dev'
     strategy:
@@ -80,7 +95,7 @@ stages:
           - task: KubernetesManifest@0
             displayName: Create imagePullSecret
             inputs:
-              kubernetesServiceConnection: 'BikeSharingSampleApp'
+              kubernetesServiceConnection: $(k8sServiceConnection)
               action: createSecret
               secretName: $(imagePullSecret)
               namespace: $(k8sNamespace)
@@ -101,12 +116,13 @@ stages:
             displayName: deploy
             name: deploy
             inputs:
-              kubernetesServiceConnection: 'BikeSharingSampleApp'
+              kubernetesServiceConnection: $(k8sServiceConnection)
               action: deploy
               namespace: $(k8sNamespace)
               manifests: $(bake.manifestsBundle)
               imagePullSecrets: $(imagePullSecret)
 
+# Deploy all PR changes
 - stage: DeployPR
   displayName: Deploy PR review app
   dependsOn: Build
@@ -115,8 +131,8 @@ stages:
   - deployment: Deploy
     displayName: Deploy job
     pool:
-      name: work-machine
-
+      vmImage: 'ubuntu-latest'
+      
     environment: 'BikeSharing-PR'
     strategy:
       runOnce:
@@ -131,7 +147,7 @@ stages:
           - task: Kubernetes@1
             displayName: 'Create namespace'
             inputs:
-              kubernetesServiceEndpoint: BikeSharingSampleApp
+              kubernetesServiceEndpoint: $(k8sServiceConnection)
               command: create
               arguments: 'ns $(system.pullRequest.sourceBranch)'
               checkLatest: true
@@ -139,7 +155,7 @@ stages:
           - task: Kubernetes@1
             displayName: 'Add devspace label'
             inputs:
-              kubernetesServiceEndpoint: BikeSharingSampleApp
+              kubernetesServiceEndpoint: $(k8sServiceConnection)
               command: label
               arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/space=true'
               checkLatest: true
@@ -147,7 +163,7 @@ stages:
           - task: Kubernetes@1
             displayName: 'Setup root devspace to master'
             inputs:
-              kubernetesServiceEndpoint: BikeSharingSampleApp
+              kubernetesServiceEndpoint: $(k8sServiceConnection)
               command: label
               arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=master'
               checkLatest: true
@@ -155,7 +171,7 @@ stages:
           - task: KubernetesManifest@0
             displayName: Create imagePullSecret
             inputs:
-              kubernetesServiceConnection: 'BikeSharingSampleApp'
+              kubernetesServiceConnection: $(k8sServiceConnection)
               action: createSecret
               secretName: $(imagePullSecret)
               namespace: $(k8sNamespaceforpr)
@@ -176,7 +192,7 @@ stages:
             displayName: deploy
             name: deploy
             inputs:
-              kubernetesServiceConnection: 'BikeSharingSampleApp'
+              kubernetesServiceConnection: $(k8sServiceConnection)
               action: deploy
               namespace: $(k8sNamespaceforpr)
               manifests: $(bake.manifestsBundle)
@@ -189,7 +205,7 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 azds controller select -n $(AZDSControllerName) -g $(AZDSControllerRG)
-                azds space select -n $(AZDSDefaultSpace)/$(system.pullRequest.sourceBranch) -y
+                azds space select -n $(k8sNamespace)/$(system.pullRequest.sourceBranch) -y
                 azds list-uris -o json 
                 azds list-uris -o json > $(AGENT.TEMPDIRECTORY)/azdsuri.txt
 
