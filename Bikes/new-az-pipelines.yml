@@ -42,7 +42,7 @@ variables:
   tag: '$(Build.BuildId)'
   
   # Kubernetes Namespace where all changes from master branch are deployed
-  k8sNamespace: 'master'
+  k8sNamespace: 'dev'
   # Dynamically created Kubernetes Namespace where all pull request changes are deployed
   k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
   
@@ -77,9 +77,9 @@ stages:
         artifactName: 'charts'
         targetPath: 'Bikes/charts/bikes'
 
-# Deploy all changes to master branch 
-- stage: DeployToMaster
-  displayName: Deploy to Master
+# Deploy all changes from master branch 
+- stage: DeployToDev
+  displayName: Deploy to Dev
   dependsOn: Build
   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/'))
   jobs:
@@ -167,11 +167,11 @@ stages:
               checkLatest: true
 
           - task: Kubernetes@1
-            displayName: 'Setup root devspace to master'
+            displayName: 'Setup root devspace to dev'
             inputs:
               kubernetesServiceEndpoint: $(k8sServiceConnection)
               command: label
-              arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=master'
+              arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=$(k8sNamespace)'
               checkLatest: true
 
           - task: KubernetesManifest@0
