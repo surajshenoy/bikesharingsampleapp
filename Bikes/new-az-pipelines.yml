@@ -17,7 +17,7 @@ resources:
 variables:
 
   # Create container registry service connection and provide the connection name or it's GUID here. Learn more https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
-  dockerRegistryServiceConnection: 'CONTAINER-REGISTRY-CONNECTION-NAME'
+  dockerRegistryServiceConnection: google
   
   # Provide the container registry url for example builddemo.azurecr.io
   containerRegistry: 'CONTAINER-REGISTRY-URL'
@@ -128,109 +128,109 @@ stages:
               manifests: $(bake.manifestsBundle)
               imagePullSecrets: $(imagePullSecret)
 
-# Deploy all PR changes
-- stage: DeployPR
-  displayName: Deploy PR review app
-  dependsOn: Build
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/pull/'))
-  jobs:
-  - deployment: Deploy
-    displayName: Deploy job
-    pool:
-      vmImage: 'ubuntu-latest'
+# # Deploy all PR changes
+# - stage: DeployPR
+#   displayName: Deploy PR review app
+#   dependsOn: Build
+#   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/pull/'))
+#   jobs:
+#   - deployment: Deploy
+#     displayName: Deploy job
+#     pool:
+#       vmImage: 'ubuntu-latest'
       
-    environment: 'BikeSharing-PR'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
+#     environment: 'BikeSharing-PR'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
           
-          - task: DownloadPipelineArtifact@1
-            inputs:
-              artifactName: 'charts'
-              downloadPath: '$(System.ArtifactsDirectory)/charts'
+#           - task: DownloadPipelineArtifact@1
+#             inputs:
+#               artifactName: 'charts'
+#               downloadPath: '$(System.ArtifactsDirectory)/charts'
 
-          - task: Kubernetes@1
-            displayName: 'Create namespace'
-            inputs:
-              kubernetesServiceEndpoint: $(k8sServiceConnection)
-              command: create
-              arguments: 'ns $(system.pullRequest.sourceBranch)'
-              checkLatest: true
+#           - task: Kubernetes@1
+#             displayName: 'Create namespace'
+#             inputs:
+#               kubernetesServiceEndpoint: $(k8sServiceConnection)
+#               command: create
+#               arguments: 'ns $(system.pullRequest.sourceBranch)'
+#               checkLatest: true
 
-          - task: Kubernetes@1
-            displayName: 'Add devspace label'
-            inputs:
-              kubernetesServiceEndpoint: $(k8sServiceConnection)
-              command: label
-              arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/space=true'
-              checkLatest: true
+#           - task: Kubernetes@1
+#             displayName: 'Add devspace label'
+#             inputs:
+#               kubernetesServiceEndpoint: $(k8sServiceConnection)
+#               command: label
+#               arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/space=true'
+#               checkLatest: true
 
-          - task: Kubernetes@1
-            displayName: 'Setup root devspace to dev'
-            inputs:
-              kubernetesServiceEndpoint: $(k8sServiceConnection)
-              command: label
-              arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=$(k8sNamespace)'
-              checkLatest: true
+#           - task: Kubernetes@1
+#             displayName: 'Setup root devspace to dev'
+#             inputs:
+#               kubernetesServiceEndpoint: $(k8sServiceConnection)
+#               command: label
+#               arguments: '--overwrite ns $(system.pullRequest.sourceBranch) azds.io/parent-space=$(k8sNamespace)'
+#               checkLatest: true
 
-          - task: KubernetesManifest@0
-            displayName: Create imagePullSecret
-            inputs:
-              kubernetesServiceConnection: $(k8sServiceConnection)
-              action: createSecret
-              secretName: $(imagePullSecret)
-              namespace: $(k8sNamespaceforpr)
-              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+#           - task: KubernetesManifest@0
+#             displayName: Create imagePullSecret
+#             inputs:
+#               kubernetesServiceConnection: $(k8sServiceConnection)
+#               action: createSecret
+#               secretName: $(imagePullSecret)
+#               namespace: $(k8sNamespaceforpr)
+#               dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
 
-          - task: KubernetesManifest@0
-            displayName: bake
-            name: bake
-            inputs:
-              action: bake
-              helmChart: '$(System.ArtifactsDirectory)/charts'
-              releaseName: bikesharing
-              overrides: |
-                image.tag:$(Build.BuildId)
-                buildID:"1"
+#           - task: KubernetesManifest@0
+#             displayName: bake
+#             name: bake
+#             inputs:
+#               action: bake
+#               helmChart: '$(System.ArtifactsDirectory)/charts'
+#               releaseName: bikesharing
+#               overrides: |
+#                 image.tag:$(Build.BuildId)
+#                 buildID:"1"
 
-          - task: KubernetesManifest@0
-            displayName: deploy
-            name: deploy
-            inputs:
-              kubernetesServiceConnection: $(k8sServiceConnection)
-              action: deploy
-              namespace: $(k8sNamespaceforpr)
-              manifests: $(bake.manifestsBundle)
-              imagePullSecrets: $(imagePullSecret)
+#           - task: KubernetesManifest@0
+#             displayName: deploy
+#             name: deploy
+#             inputs:
+#               kubernetesServiceConnection: $(k8sServiceConnection)
+#               action: deploy
+#               namespace: $(k8sNamespaceforpr)
+#               manifests: $(bake.manifestsBundle)
+#               imagePullSecrets: $(imagePullSecret)
           
-          - task: AzureCLI@1
-            displayName: 'List all review app URLs'
-            inputs:
-              azureSubscription: $(azureServiceConnection)
-              scriptLocation: inlineScript
-              inlineScript: |
-                azds controller select -n $(AZDSControllerName) -g $(AZDSControllerRG)
-                azds space select -n $(k8sNamespace)/$(system.pullRequest.sourceBranch) -y
-                azds list-uris -o json 
-                azds list-uris -o json > $(AGENT.TEMPDIRECTORY)/azdsuri.txt
+#           - task: AzureCLI@1
+#             displayName: 'List all review app URLs'
+#             inputs:
+#               azureSubscription: $(azureServiceConnection)
+#               scriptLocation: inlineScript
+#               inlineScript: |
+#                 azds controller select -n $(AZDSControllerName) -g $(AZDSControllerRG)
+#                 azds space select -n $(k8sNamespace)/$(system.pullRequest.sourceBranch) -y
+#                 azds list-uris -o json 
+#                 azds list-uris -o json > $(AGENT.TEMPDIRECTORY)/azdsuri.txt
 
-          - powershell: |
-              $uriret = (Get-Content $(AGENT.TEMPDIRECTORY)/azdsuri.txt | Out-String | ConvertFrom-Json)[0].uri
-              Write-Host "##vso[task.setvariable variable=RETURI]$uriret"
-              Write-Host "$uriret"
-            displayName: 'Get PR review app url for the current PR'
+#           - powershell: |
+#               $uriret = (Get-Content $(AGENT.TEMPDIRECTORY)/azdsuri.txt | Out-String | ConvertFrom-Json)[0].uri
+#               Write-Host "##vso[task.setvariable variable=RETURI]$uriret"
+#               Write-Host "$uriret"
+#             displayName: 'Get PR review app url for the current PR'
           
-          - task: jikuma.devops-github-extension.custom-build-release-task.azuredevopsgithub@0
-            displayName: 'Write the PR review app details to GitHub'
-            name: UpdatePR
-            inputs:
-              gitHubConnection: $(githubServiceConnection)
-              body: |
-                {
-                  "state": "success",
-                  "target_url": "$(RETURI)",
-                  "description": "available",
-                  "context": "Dev Spaces review app"
-                }
-              githubrestapiurl: 'https://api.github.com/repos/$(BUILD.REPOSITORY.ID)/statuses/$(system.pullRequest.sourceCommitId)'
+#           - task: jikuma.devops-github-extension.custom-build-release-task.azuredevopsgithub@0
+#             displayName: 'Write the PR review app details to GitHub'
+#             name: UpdatePR
+#             inputs:
+#               gitHubConnection: $(githubServiceConnection)
+#               body: |
+#                 {
+#                   "state": "success",
+#                   "target_url": "$(RETURI)",
+#                   "description": "available",
+#                   "context": "Dev Spaces review app"
+#                 }
+#               githubrestapiurl: 'https://api.github.com/repos/$(BUILD.REPOSITORY.ID)/statuses/$(system.pullRequest.sourceCommitId)'
