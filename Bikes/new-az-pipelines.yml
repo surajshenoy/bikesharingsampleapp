@@ -37,7 +37,7 @@ variables:
   # # Create GitHub Service connection and provide the connection name or it's GUID here. Learn more https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#sep-github
   # githubServiceConnection: 'GITHUB-CONNECTION-NAME'
     
-  imageRepository: 'bikes'
+  imageRepository: 'gkedemo-242807/bikes'
   dockerfilePath: 'Bikes/Dockerfile'
   tag: '$(Build.BuildId)'
   
