@@ -22,8 +22,8 @@ variables:
   # # Provide the container registry url for example builddemo.azurecr.io
   # containerRegistry: 'CONTAINER-REGISTRY-URL'
   
-  # # Create Kubernetes service connection and provide the connection name or it's GUID here. Learn more https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
-  # k8sServiceConnection: 'KUBERNETES-CONNECTION-NAME'
+  # Create Kubernetes service connection and provide the connection name or it's GUID here. Learn more https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
+  k8sServiceConnection: srivatsa-k8s
   
   # # Provide the name of Kubernetes cluster
   # AZDSControllerName: 'KUBERNETES-CLUSTER-NAME'
@@ -43,8 +43,8 @@ variables:
   
   # Kubernetes Namespace where all changes from master branch are deployed
   k8sNamespace: 'dev'
-  # Dynamically created Kubernetes Namespace where all pull request changes are deployed
-  k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
+  # # Dynamically created Kubernetes Namespace where all pull request changes are deployed
+  # k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
   
   # Name of imagepullsecret
   imagePullSecret: 'builddemodfb0-auth'
