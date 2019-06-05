@@ -77,56 +77,56 @@ stages:
         artifactName: 'charts'
         targetPath: 'Bikes/charts/bikes'
 
-# # Deploy all changes from master branch 
-# - stage: DeployToDev
-#   displayName: Deploy to Dev
-#   dependsOn: Build
-#   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/'))
-#   jobs:
-#   - deployment: Deploy
-#     displayName: Deploy job
-#     pool:
-#       vmImage: 'ubuntu-latest'
+# Deploy all changes from master branch 
+- stage: DeployToDev
+  displayName: Deploy to Dev
+  dependsOn: Build
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/'))
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    pool:
+      vmImage: 'ubuntu-latest'
 
-#     environment: 'BikeSharingSampleApp-Dev'
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - task: DownloadPipelineArtifact@1
-#             inputs:
-#               artifactName: 'charts'
-#               downloadPath: '$(System.ArtifactsDirectory)/charts'
+    environment: 'BikeSharingSampleApp-Dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@1
+            inputs:
+              artifactName: 'charts'
+              downloadPath: '$(System.ArtifactsDirectory)/charts'
 
-#           - task: KubernetesManifest@0
-#             displayName: Create imagePullSecret
-#             inputs:
-#               kubernetesServiceConnection: $(k8sServiceConnection)
-#               action: createSecret
-#               secretName: $(imagePullSecret)
-#               namespace: $(k8sNamespace)
-#               dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              kubernetesServiceConnection: $(k8sServiceConnection)
+              action: createSecret
+              secretName: $(imagePullSecret)
+              namespace: $(k8sNamespace)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
 
-#           - task: KubernetesManifest@0
-#             displayName: bake
-#             name: bake
-#             inputs:
-#               action: bake
-#               helmChart: '$(System.ArtifactsDirectory)/charts'
-#               releaseName: bikesharing
-#               overrides: |
-#                 image.tag:$(Build.BuildId)
-#                 buildID:"1"
+          - task: KubernetesManifest@0
+            displayName: bake
+            name: bake
+            inputs:
+              action: bake
+              helmChart: '$(System.ArtifactsDirectory)/charts'
+              releaseName: bikesharing
+              overrides: |
+                image.tag:$(Build.BuildId)
+                buildID:"1"
                
-#           - task: KubernetesManifest@0
-#             displayName: deploy
-#             name: deploy
-#             inputs:
-#               kubernetesServiceConnection: $(k8sServiceConnection)
-#               action: deploy
-#               namespace: $(k8sNamespace)
-#               manifests: $(bake.manifestsBundle)
-#               imagePullSecrets: $(imagePullSecret)
+          - task: KubernetesManifest@0
+            displayName: deploy
+            name: deploy
+            inputs:
+              kubernetesServiceConnection: $(k8sServiceConnection)
+              action: deploy
+              namespace: $(k8sNamespace)
+              manifests: $(bake.manifestsBundle)
+              imagePullSecrets: $(imagePullSecret)
 
 # # Deploy all PR changes
 # - stage: DeployPR
