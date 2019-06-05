@@ -17,7 +17,7 @@ resources:
 variables:
 
   # Create container registry service connection and provide the connection name or it's GUID here. Learn more https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
-  dockerRegistryServiceConnection: gcr-tutorial
+  dockerRegistryServiceConnection: srivatsa-gcr
   
   # # Provide the container registry url for example builddemo.azurecr.io
   # containerRegistry: 'CONTAINER-REGISTRY-URL'
