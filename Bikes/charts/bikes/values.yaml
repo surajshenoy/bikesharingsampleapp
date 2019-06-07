@@ -4,8 +4,8 @@
 fullnameOverride: bikes
 replicaCount: 1
 image:
-  repository: builddemo.azurecr.io/bikes
-  tag: build.20190418.1
+  repository: gcr.io/myfirstdeploy/bikes
+  tag: 753
   pullPolicy: IfNotPresent
 imagePullSecrets: []
   # Optionally specify an array of imagePullSecrets.
