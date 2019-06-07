@@ -42,7 +42,7 @@ variables:
   tag: '$(Build.BuildId)'
   
   # Kubernetes Namespace where all changes from master branch are deployed
-  k8sNamespace: 'dev'
+  k8sNamespace: 'default'
   # # Dynamically created Kubernetes Namespace where all pull request changes are deployed
   # k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
   
