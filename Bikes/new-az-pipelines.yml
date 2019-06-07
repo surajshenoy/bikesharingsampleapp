@@ -47,7 +47,7 @@ variables:
   # k8sNamespaceforpr: $(system.pullRequest.sourceBranch)
   
   # Name of imagepullsecret
-  imagePullSecret: 'builddemodfb0-auth'
+  imagePullSecret: gkedemo
 
 
 # CI stage for build and pushing image to container registry
@@ -98,14 +98,26 @@ stages:
               artifactName: 'charts'
               downloadPath: '$(System.ArtifactsDirectory)/charts'
 
-          - task: KubernetesManifest@0
+          # - task: KubernetesManifest@0
+          #   displayName: Create imagePullSecret
+          #   inputs:
+          #     kubernetesServiceConnection: $(k8sServiceConnection)
+          #     action: createSecret
+          #     secretName: $(imagePullSecret)
+          #     namespace: $(k8sNamespace)
+          #     dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+          - task: Kubernetes@1
             displayName: Create imagePullSecret
             inputs:
-              kubernetesServiceConnection: $(k8sServiceConnection)
-              action: createSecret
-              secretName: $(imagePullSecret)
-              namespace: $(k8sNamespace)
-              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: 'srivatsa-k8s'
+              namespace: 'default'
+              command: 
+              secretType: 'dockerRegistry'
+              containerRegistryType: 'Container Registry'
+              dockerRegistryEndpoint: 'srivatsa-gcr'
+              secretName: '$(imagePullSecret)'
 
           - task: KubernetesManifest@0
             displayName: bake
