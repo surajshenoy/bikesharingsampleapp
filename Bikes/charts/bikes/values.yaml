@@ -4,7 +4,7 @@
 fullnameOverride: bikes
 replicaCount: 1
 image:
-  repository: 565640591923.dkr.ecr.us-east-2.amazonaws.com/eksdemo
+  repository: gcr.io/myfirstdeploy/bikes
   tag: $(Build.BuildId)
   pullPolicy: IfNotPresent
 imagePullSecrets: []
