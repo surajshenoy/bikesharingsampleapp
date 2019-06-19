@@ -28,7 +28,7 @@
        # Name of the imagepullsecret
        imagePullSecret: contoso
 
-    stages:
+      stages:
      - stage: Build
        displayName: Build stage
        jobs:  
