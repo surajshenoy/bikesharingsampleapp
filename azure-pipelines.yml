@@ -1,0 +1,54 @@
+# Trigger only for master branch, Bikes folder
+   trigger:
+       branches:
+           include:
+           - master
+           paths:
+             include:
+             - Bikes/*            
+   resources:
+   - repo: self
+
+   variables:
+       # Create container registry service connection and provide the connection
+       # name or it's GUID here
+       dockerRegistryServiceConnection: gcr-tutorial1
+
+       # Create Kubernetes service connection and provide the connection name
+       # or it's GUID here
+       k8sServiceConnection: contoso-k8s
+
+       imageRepository: 'myprojectsj/bikes'
+       dockerfilePath: 'Bikes/Dockerfile'
+       tag: '$(Build.BuildId)'
+
+       # Kubernetes Namespace
+       k8sNamespace: 'default'
+
+       # Name of the imagepullsecret
+       imagePullSecret: contoso
+
+    stages:
+     - stage: Build
+       displayName: Build stage
+       jobs:  
+       - job: Build
+         displayName: Build job     
+       pool:
+         vmImage: 'ubuntu-latest'
+
+       steps:
+         - task: Docker@2
+           displayName: Build and push an image to container registry
+           inputs:
+            command: buildAndPush
+            repository: $(imageRepository)
+            dockerfile: $(dockerfilePath)
+            containerRegistry: $(dockerRegistryServiceConnection)
+            tags: |
+               $(tag)
+
+         - task: PublishPipelineArtifact@0
+           inputs:
+             artifactName: 'charts'
+             targetPath: 'Bikes/charts/bikes'
