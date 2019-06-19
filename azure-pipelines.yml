@@ -18,7 +18,7 @@
        # or it's GUID here
        k8sServiceConnection: contoso-k8s
 
-       imageRepository: 'myprojectsj/bikes'
+       imageRepository: 'myfirstdeploy/bikes'
        dockerfilePath: 'Bikes/Dockerfile'
        tag: '$(Build.BuildId)'
 
