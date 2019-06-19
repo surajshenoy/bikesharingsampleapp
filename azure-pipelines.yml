@@ -3,9 +3,9 @@
        branches:
            include:
            - master
-           paths:
-             include:
-             - Bikes/*            
+#          paths:
+#             include:
+#             - Bikes/*            
    resources:
    - repo: self
 
