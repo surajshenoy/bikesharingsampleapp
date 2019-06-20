@@ -3,9 +3,9 @@
        branches:
            include:
            - master
-           paths:
-             include:
-             - Bikes/*            
+#           paths:
+#             include:
+#             - Bikes/*            
    resources:
    - repo: self
 
@@ -28,8 +28,8 @@
        # Name of the imagepullsecret
        imagePullSecret: contoso
 
-      stages:
-     - stage: Build
+       stages:
+       - stage: Build
        displayName: Build stage
        jobs:  
        - job: Build
